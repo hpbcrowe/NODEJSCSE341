@@ -9,10 +9,14 @@ const csrf = require('csurf');
 const flash = require('connect-flash');
 
 const errorController = require('./controllers/error');
+require('dotenv').config();
 
 const User = require('./models/user');
 
-const MONGODB_URI = 'mongodb+srv://hpbcrowe:SonBetRahCro1@cluster0.gz90y.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+const MONGODB_URI = process.env.MONGODB_URI;
+//console.log(MONGODB_URI);
+
+
 
 const cors = require('cors') // Place this with other requires (like 'path' and 'express')
 const PORT = process.env.PORT || 5000 
@@ -52,11 +56,15 @@ app.use((req, res, next) => {
   }
   User.findById(req.session.user._id)
   .then(user => {
+    if(!user) {
+      return next();
+    }
     req.user = user;
     next();
    })
-  .catch(err => console.log(err));
-
+  .catch(err => {
+    next(new Error(err));
+  });
 });
 
 app.use((req, res, next) => {
@@ -69,8 +77,13 @@ app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
+app.get('500',errorController.get500);
+
 app.use(errorController.get404);
 
+app.use((error, req, res, next) => {
+  res.redirect('/500');
+});
 
 
 
@@ -93,7 +106,7 @@ const options = {
     family: 4
 };
 
-const MONGODB_URL = process.env.MONGODB_URL || MONGODB_URI;
+const MONGODB_URL = process.env.MONGODB_URI
 
 
 //app.listen(3000);
