@@ -9,15 +9,21 @@ const adminController = require('../controllers/admin');
 const isAuth = require('../middleware/is-auth');
 
 const router = express.Router();
-
 //admin/add-product => GET
-router.get('/add-product', [
+
+router.get('/add-product', isAuth, adminController.getAddProduct);
+
+
+//admin/products => GET*************************************************************
+router.get('/products', isAuth, adminController.getProducts);
+
+
+// /admin/add-product => POST
+router.post('/add-product', [
     body('title')
         .isString()
         .isLength({ min: 3})
         .trim(),
-    body('imageUrl')
-        .isURL(),
     body('price')
         .isFloat(),
     body('description')
@@ -25,24 +31,18 @@ router.get('/add-product', [
         .trim()    
     ],
      isAuth, 
-     adminController.getAddProduct);
+     adminController.postAddProduct);
 
-//admin/products => GET
-router.get('/products', isAuth, adminController.getProducts);
 
-// /admin/add-product => POST
-router.post('/add-product', isAuth, adminController.postAddProduct);
-
+//verified***************************************************************************
 router.get('/edit-product/:productId', isAuth, adminController.getEditProduct);
-
+//verified************************************************************************
 router.post('/edit-product',
 [
     body('title')
         .isString()
         .isLength({ min: 3})
         .trim(),
-    body('imageUrl')
-        .isURL(),
     body('price')
         .isFloat(),
     body('description')
@@ -52,6 +52,7 @@ router.post('/edit-product',
  isAuth, 
  adminController.postEditProduct);
 
+ //verified******************************************************************
 router.post('/delete-product', isAuth, adminController.postDeleteProduct);
 
 module.exports = router;
